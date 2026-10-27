@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace – AdekaCore</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00d4ff" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #050505;
+      color: #e5e5e5;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(5,5,5,0.95);
+      border-bottom: 1px solid #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; }
+    .logo span { color: #00d4ff; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .user-info { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
+    .user-info img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #00d4ff55; }
+    .signout-btn {
+      background: transparent; border: 1px solid #333; color: #ccc;
+      padding: 0.35rem 0.9rem; border-radius: 50px; cursor: pointer; font-size: 0.85rem;
+    }
+    .signout-btn:hover { border-color: #ff4d4d; color: #ff4d4d; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .welcome { margin-bottom: 1.8rem; }
+    .welcome h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+    .welcome p { color: #888; font-size: 0.95rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #0c0c0c;
+      border: 1px solid #1a1a1a;
+      border-radius: 14px;
+      padding: 1.3rem;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #00d4ff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .full-width { grid-column: 1 / -1; }
+
+    .profile-row { display: flex; gap: 1rem; align-items: center; }
+    .profile-row img { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #00d4ff44; }
+    .profile-details strong { display: block; }
+    .profile-details p { color: #aaa; font-size: 0.9rem; margin-top: 0.15rem; }
+
+    .upload-area {
+      border: 2px dashed #2a2a2a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #00d4ff; }
+    .upload-area input { display: none; }
+    .file-item {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .file-item a { color: #00d4ff; word-break: break-all; }
+    .file-meta { font-size: 0.8rem; color: #666; }
+
+    .event-item {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.55rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .event-item strong { color: #00d4ff; }
+    .event-date { font-size: 0.85rem; color: #888; }
+
+    .announcement {
+      background: #111;
+      border-left: 3px solid #00d4ff;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.7rem;
+      border-radius: 0 8px 8px 0;
+    }
+    .announcement .date { font-size: 0.75rem; color: #666; margin-bottom: 0.25rem; }
+    .ann-actions { margin-top: 0.4rem; }
+    .ann-actions button {
+      background: transparent; border: 1px solid #444; color: #aaa;
+      padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem;
+      cursor: pointer; margin-right: 0.4rem;
+    }
+
+    .chat-box {
+      height: 260px;
+      overflow-y: auto;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 10px;
+      padding: 0.9rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.9rem;
+    }
+    .chat-message { margin-bottom: 0.7rem; position: relative; }
+    .chat-message .author { color: #00d4ff; font-weight: 600; font-size: 0.8rem; }
+    .chat-message .text { color: #ccc; margin-top: 0.1rem; word-break: break-word; }
+    .chat-message .del-btn {
+      background: transparent; border: none; color: #666; font-size: 0.75rem;
+      cursor: pointer; margin-left: 0.5rem; padding: 0 0.3rem;
+    }
+    .chat-message .del-btn:hover { color: #ff4d4d; }
+    .emoji-bar {
+      display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.5rem;
+    }
+    .emoji-bar button {
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px;
+      padding: 0.25rem 0.45rem; font-size: 1.1rem; cursor: pointer;
+    }
+    .emoji-bar button:hover { border-color: #00d4ff; }
+    .chat-input-row { display: flex; gap: 0.5rem; }
+    .chat-input-row input {
+      flex: 1; padding: 0.65rem 1rem; background: #111;
+      border: 1px solid #2a2a2a; border-radius: 50px; color: #fff; outline: none;
+    }
+    .chat-input-row input:focus { border-color: #00d4ff; }
+    .chat-input-row button {
+      background: #00d4ff; color: #000; border: none;
+      padding: 0.65rem 1.2rem; border-radius: 50px; font-weight: 600; cursor: pointer;
+    }
+
+    .form-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+    .form-row input, .form-row textarea {
+      padding: 0.6rem 0.9rem; background: #111; border: 1px solid #2a2a2a;
+      border-radius: 8px; color: #fff; outline: none;
+    }
+    .btn {
+      background: #00d4ff; color: #000; border: none;
+      padding: 0.55rem 1.1rem; border-radius: 50px; font-weight: 600;
+      cursor: pointer; font-size: 0.9rem;
+    }
+    .btn-danger {
+      background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d;
+      padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer;
+    }
+    .founder-only { display: none; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Adeka<span>Core</span> Workspace</div>
+    <div class="nav-right">
+      <div class="user-info">
+        <img id="userPhoto" src="" alt="" />
+        <span id="userName">Loading...</span>
+      </div>
+      <button class="signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="welcome">
+      <h1>Welcome back, <span id="welcomeName">Member</span></h1>
+      <p id="userRoleText">Member of AdekaCore</p>
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <h3>👤 Your Profile</h3>
+        <div class="profile-row">
+          <img id="profilePhoto" src="" alt="Profile" />
+          <div class="profile-details">
+            <strong id="profileName">—</strong>
+            <p id="profileEmail">—</p>
+            <p id="userRole" style="margin-top:0.35rem; font-size:0.85rem; color:#00d4ff; font-weight:600;">Member</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📁 Shared Files</h3>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <div style="font-size:1.8rem; margin-bottom:0.4rem;">＋</div>
+          <div style="color:#aaa; font-size:0.9rem;">Click to upload a file</div>
+          <div style="color:#555; font-size:0.8rem; margin-top:0.3rem;">PDF, images, docs, etc.</div>
+          <input type="file" id="fileInput" onchange="uploadFile()" />
+        </div>
+        <div id="filesList">
+          <p style="color:#666; font-size:0.9rem;">No files uploaded yet.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📅 Shared Calendar</h3>
+        <div id="calendarList">
+          <p style="color:#888;">Loading events...</p>
+        </div>
+        <div class="founder-only form-row" id="addEventBox">
+          <input type="text" id="eventTitle" placeholder="Event title" style="flex:1; min-width:140px;" />
+          <input type="date" id="eventDate" />
+          <button class="btn" onclick="addEvent()">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📌 Announcements</h3>
+        <div id="announcementsList">
+          <p style="color:#888;">Loading...</p>
+        </div>
+        <div class="founder-only" id="postAnnouncementBox" style="margin-top:1rem;">
+          <textarea id="newAnnouncement" placeholder="Write a new announcement..." 
+            style="width:100%; min-height:70px; padding:0.7rem; background:#111; border:1px solid #2a2a2a; border-radius:8px; color:#fff; resize:vertical;"></textarea>
+          <button class="btn" style="margin-top:0.5rem;" onclick="postAnnouncement()">Post Announcement</button>
+        </div>
+      </div>
+
+      <div class="card full-width">
+        <h3>💬 Group Chat</h3>
+        <div class="chat-box" id="chatBox">
+          <div style="color:#666; text-align:center; margin-top:2rem;">Loading messages...</div>
+        </div>
+        <div class="emoji-bar" id="emojiBar">
+          <button type="button" onclick="insertEmoji('😀')">😀</button>
+          <button type="button" onclick="insertEmoji('😂')">😂</button>
+          <button type="button" onclick="insertEmoji('❤️')">❤️</button>
+          <button type="button" onclick="insertEmoji('🔥')">🔥</button>
+          <button type="button" onclick="insertEmoji('👍')">👍</button>
+          <button type="button" onclick="insertEmoji('🎉')">🎉</button>
+          <button type="button" onclick="insertEmoji('🙏')">🙏</button>
+          <button type="button" onclick="insertEmoji('💯')">💯</button>
+          <button type="button" onclick="insertEmoji('🚀')">🚀</button>
+          <button type="button" onclick="insertEmoji('✨')">✨</button>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleKey(event)" />
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+
+      <div class="card full-width founder-only" id="adminPanel">
+        <h3>⚙️ Admin Panel – Special Assistants</h3>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:1rem;">
+          People added here can see private content. Use their Gmail.
+        </p>
+        <div class="form-row">
+          <input type="email" id="newAssistantEmail" placeholder="email@gmail.com" style="flex:1; min-width:200px;" />
+          <button class="btn" onclick="addSpecialAssistant()">Add Assistant</button>
+        </div>
+        <div id="assistantsList" style="margin-top:1rem; font-size:0.9rem; color:#ccc;">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const founderEmails = ["alvinlurison@gmail.com", "marsadkyahoo123@gmail.com"];
+    let currentUser = null;
+    let isFounder = false;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      isFounder = founderEmails.includes(user.email.toLowerCase());
+
+      document.getElementById("userName").textContent = user.displayName || "Member";
+      document.getElementById("welcomeName").textContent = (user.displayName || "Member").split(" ")[0];
+      document.getElementById("profileName").textContent = user.displayName || "Member";
+      document.getElementById("profileEmail").textContent = user.email || "";
+      if (user.photoURL) {
+        document.getElementById("userPhoto").src = user.photoURL;
+        document.getElementById("profilePhoto").src = user.photoURL;
+      }
+
+      const roleEl = document.getElementById("userRole");
+      const roleText = document.getElementById("userRoleText");
+      if (isFounder) {
+        roleEl.textContent = "Founder & CEO of AdekaCore";
+        roleText.textContent = "Founder & CEO of AdekaCore";
+        document.querySelectorAll(".founder-only").forEach(el => el.style.display = "block");
+        loadSpecialAssistants();
+      } else {
+        db.collection("specialAssistants").doc(user.email.toLowerCase()).get()
+          .then(doc => {
+            if (doc.exists) {
+              roleEl.textContent = "Special Assistant";
+              roleEl.style.color = "#22c55e";
+              roleText.textContent = "Special Assistant";
+            } else {
+              roleEl.textContent = "Member of AdekaCore";
+              roleText.textContent = "Member of AdekaCore";
+            }
+          });
+      }
+
+      loadFiles();
+      loadCalendar();
+      loadAnnouncements();
+      loadChat();
+    });
+
+    function signOut() {
+      auth.signOut().then(() => window.location.href = "login.html");
+    }
+
+    function loadFiles() {
+      const list = document.getElementById("filesList");
+      db.collection("adekacore_files").orderBy("createdAt", "desc").limit(30)
+        .onSnapshot(snap => {
+          if (snap.empty) {
+            list.innerHTML = '<p style="color:#666; font-size:0.9rem;">No files uploaded yet.</p>';
+            return;
+          }
+          let html = "";
+          snap.forEach(doc => {
+            const d = doc.data();
+            html += '<div class="file-item"><div><a href="' + d.url + '" target="_blank">' + d.name + '</a><div class="file-meta">by ' + d.uploadedBy + '</div></div>' +
+              (isFounder ? '<button class="btn-danger" onclick="deleteFile(\'' + doc.id + '\', \'' + (d.storagePath || '') + '\')">Delete</button>' : '') + '</div>';
+          });
+          list.innerHTML = html;
+        });
+    }
+
+    function uploadFile() {
+      const input = document.getElementById("fileInput");
+      const file = input.files[0];
+      if (!file) return;
+      const path = "adekacore_files/" + Date.now() + "_" + file.name;
+      const task = firebase.storage().ref().child(path).put(file);
+      task.then(s => s.ref.getDownloadURL())
+        .then(url => db.collection("adekacore_files").add({
+          name: file.name, url: url, storagePath: path,
+          uploadedBy: currentUser.displayName || currentUser.email,
+          email: currentUser.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }))
+        .then(() => { input.value = ""; alert("File uploaded"); })
+        .catch(err => { console.error(err); alert("Upload failed. Enable Storage + rules."); });
+    }
+
+    function deleteFile(id, storagePath) {
+      if (!confirm("Delete this file?")) return;
+      db.collection("adekacore_files").doc(id).delete().then(() => {
+        if (storagePath) firebase.storage().ref().child(storagePath).delete().catch(() => {});
+      });
+    }
+
+    function loadCalendar() {
+      const list = document.getElementById("calendarList");
+      db.collection("adekacore_events").orderBy("date", "asc")
+        .onSnapshot(snap => {
+          if (snap.empty) {
+            list.innerHTML = '<p style="color:#888;">No upcoming events.</p>';
+            return;
+          }
+          let html = "";
+          snap.forEach(doc => {
+            const d = doc.data();
+            html += '<div class="event-item"><div><strong>' + d.title + '</strong><div class="event-date">' + d.date + '</div></div>' +
+              (isFounder ? '<button class="btn-danger" onclick="deleteEvent(\'' + doc.id + '\')">Delete</button>' : '') + '</div>';
+          });
+          list.innerHTML = html;
+        });
+    }
+
+    function addEvent() {
+      const title = document.getElementById("eventTitle").value.trim();
+      const date = document.getElementById("eventDate").value;
+      if (!title || !date) return alert("Enter title and date");
+      db.collection("adekacore_events").add({
+        title, date, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        document.getElementById("eventTitle").value = "";
+        document.getElementById("eventDate").value = "";
+      });
+    }
+
+    function deleteEvent(id) {
+      if (!confirm("Delete this event?")) return;
+      db.collection("adekacore_events").doc(id).delete();
+    }
+
+    function loadAnnouncements() {
+      const list = document.getElementById("announcementsList");
+      db.collection("adekacore_announcements").orderBy("createdAt", "desc").limit(15)
+        .onSnapshot(snap => {
+          if (snap.empty) {
+            list.innerHTML = '<div class="announcement"><div class="date">Pinned</div><div>Welcome to AdekaCore Workspace</div></div>';
+            return;
+          }
+          let html = "";
+          snap.forEach(doc => {
+            const d = doc.data();
+            html += '<div class="announcement"><div class="date">' + (d.date || "Pinned") + '</div><div>' + d.text + '</div>';
+            if (isFounder) {
+              html += '<div class="ann-actions"><button onclick="editAnnouncement(\'' + doc.id + '\')">Edit</button><button onclick="deleteAnnouncement(\'' + doc.id + '\')">Delete</button></div>';
+            }
+            html += '</div>';
+          });
+          list.innerHTML = html;
+        });
+    }
+
+    function postAnnouncement() {
+      const text = document.getElementById("newAnnouncement").value.trim();
+      if (!text) return;
+      const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      db.collection("adekacore_announcements").add({
+        text, date: today, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => document.getElementById("newAnnouncement").value = "");
+    }
+
+    function editAnnouncement(id) {
+      const newText = prompt("Edit announcement:");
+      if (!newText || !newText.trim()) return;
+      db.collection("adekacore_announcements").doc(id).update({ text: newText.trim() });
+    }
+
+    function deleteAnnouncement(id) {
+      if (!confirm("Delete this announcement?")) return;
+      db.collection("adekacore_announcements").doc(id).delete();
+    }
+
+    function loadChat() {
+      const chatBox = document.getElementById("chatBox");
+      db.collection("adekacore_chat").orderBy("createdAt", "asc").limitToLast(60)
+        .onSnapshot(snap => {
+          chatBox.innerHTML = "";
+          if (snap.empty) {
+            chatBox.innerHTML = '<div style="color:#666; text-align:center; margin-top:2rem;">No messages yet. Say hello!</div>';
+            return;
+          }
+          snap.forEach(doc => {
+            const d = doc.data();
+            const isMine = currentUser && d.email === currentUser.email;
+            const msg = document.createElement("div");
+            msg.className = "chat-message";
+            let html = '<div class="author">' + (d.name || "Member");
+            if (isMine || isFounder) {
+              html += ' <button class="del-btn" onclick="deleteMessage(\'' + doc.id + '\')" title="Delete">🗑️</button>';
+            }
+            html += '</div><div class="text">' + escapeHtml(d.text) + '</div>';
+            msg.innerHTML = html;
+            chatBox.appendChild(msg);
+          });
+          chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const text = input.value.trim();
+      if (!text) return;
+      db.collection("adekacore_chat").add({
+        text: text,
+        name: currentUser.displayName || "Member",
+        email: currentUser.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => input.value = "");
+    }
+
+    function deleteMessage(id) {
+      if (!confirm("Delete this message?")) return;
+      db.collection("adekacore_chat").doc(id).delete()
+        .catch(err => {
+          console.error(err);
+          alert("Could not delete message");
+        });
+    }
+
+    function insertEmoji(emoji) {
+      const input = document.getElementById("chatInput");
+      input.value += emoji;
+      input.focus();
+    }
+
+    function handleKey(e) { if (e.key === "Enter") sendMessage(); }
+
+    function loadSpecialAssistants() {
+      const list = document.getElementById("assistantsList");
+      db.collection("specialAssistants").get().then(snap => {
+        if (snap.empty) {
+          list.innerHTML = '<p style="color:#666;">No Special Assistants yet.</p>';
+          return;
+        }
+        let html = "<strong style='color:#00d4ff;'>Current Special Assistants:</strong><ul style='margin-top:0.5rem; padding-left:1.1rem;'>";
+        snap.forEach(doc => {
+          html += '<li style="margin-bottom:0.45rem; display:flex; justify-content:space-between; align-items:center;"><span>' + doc.id + '</span><button class="btn-danger" onclick="removeSpecialAssistant(\'' + doc.id + '\')">Remove</button></li>';
+        });
+        html += "</ul>";
+        list.innerHTML = html;
+      });
+    }
+
+    function addSpecialAssistant() {
+      const email = document.getElementById("newAssistantEmail").value.trim().toLowerCase();
+      if (!email || !email.includes("@")) return alert("Enter a valid email");
+      db.collection("specialAssistants").doc(email).set({
+        addedAt: new Date().toISOString(), addedBy: currentUser.email
+      }).then(() => {
+        document.getElementById("newAssistantEmail").value = "";
+        loadSpecialAssistants();
+      });
+    }
+
+    function removeSpecialAssistant(email) {
+      if (!confirm("Remove " + email + "?")) return;
+      db.collection("specialAssistants").doc(email).delete().then(loadSpecialAssistants);
+    }
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then(reg => {
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              if (confirm("A new version of AdekaCore is available.\n\nUpdate now?")) {
+                newWorker.postMessage({ action: "skipWaiting" });
+                window.location.reload();
+              }
+            }
+          });
+        });
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>

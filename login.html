@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In – AdekaCore</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00d4ff" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #050505;
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #0a1a2a 0%, #050505 70%);
+      padding: 1rem;
+    }
+    .login-box {
+      background: #0c0c0c;
+      border: 1px solid #1f1f1f;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .logo { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .logo span { color: #00d4ff; }
+    .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.95rem; }
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; background: #fff; color: #333; border: none;
+      padding: 0.9rem 1.5rem; border-radius: 50px; font-weight: 600;
+      font-size: 1rem; cursor: pointer; transition: all 0.2s;
+    }
+    .google-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .google-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,255,255,0.15); }
+    .google-btn img { width: 22px; height: 22px; }
+    .terms-box {
+      text-align: left; margin: 1.5rem 0 1.8rem;
+      background: #111; border: 1px solid #222; border-radius: 12px; padding: 1rem;
+      font-size: 0.85rem; color: #aaa; line-height: 1.5;
+    }
+    .terms-box label { display: flex; gap: 0.6rem; align-items: flex-start; cursor: pointer; }
+    .terms-box input { margin-top: 0.2rem; accent-color: #00d4ff; }
+    .terms-box a { color: #00d4ff; text-decoration: underline; }
+    .error {
+      background: #2a0a0a; color: #ff6b6b; padding: 0.8rem;
+      border-radius: 10px; margin-bottom: 1.2rem; font-size: 0.9rem; display: none;
+    }
+    .back-link { display: inline-block; margin-top: 1.8rem; color: #00d4ff; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="logo">Adeka<span>Core</span></div>
+    <p class="subtitle">Sign in to access your member workspace</p>
+
+    <div class="error" id="errorBox"></div>
+
+    <div class="terms-box">
+      <label>
+        <input type="checkbox" id="agreeTerms" onchange="toggleSignIn()" />
+        <span>
+          I agree to the 
+          <a href="privacy.html" target="_blank">Privacy Policy</a> 
+          and 
+          <a href="terms.html" target="_blank">Terms & Conditions</a> 
+          of AdekaCore.
+        </span>
+      </label>
+    </div>
+
+    <button class="google-btn" id="googleBtn" onclick="signInWithGoogle()" disabled>
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+      Continue with Google
+    </button>
+
+    <a href="index.html" class="back-link">← Back to AdekaCore</a>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = "workspace.html";
+    });
+
+    function toggleSignIn() {
+      document.getElementById("googleBtn").disabled = !document.getElementById("agreeTerms").checked;
+    }
+
+    function signInWithGoogle() {
+      if (!document.getElementById("agreeTerms").checked) {
+        alert("Please agree to the Privacy Policy and Terms first.");
+        return;
+      }
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => window.location.href = "workspace.html")
+        .catch(err => {
+          const box = document.getElementById("errorBox");
+          box.style.display = "block";
+          box.textContent = err.message;
+        });
+    }
+
+    // PWA update check
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then(reg => {
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              if (confirm("A new version of AdekaCore is available. Update now?")) {
+                newWorker.postMessage({ action: "skipWaiting" });
+                window.location.reload();
+              }
+            }
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "AdekaCore",
+  "short_name": "AdekaCore",
+  "description": "Youth-powered tech company & movement",
+  "start_url": "/AdekaCore-/",
+  "scope": "/AdekaCore-/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#00d4ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/AdekaCore-/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/AdekaCore-/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
