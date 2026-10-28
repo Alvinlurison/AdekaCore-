@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>CoreTalk</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00d4ff" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+    }
+    .box { width: 100%; max-width: 380px; text-align: center; }
+    .logo { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.3rem; }
+    .logo span { color: #00d4ff; }
+    .tag { color: #777; font-size: 0.95rem; margin-bottom: 2.2rem; }
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; border: none; padding: 0.95rem; border-radius: 50px;
+      font-weight: 600; font-size: 1rem; cursor: pointer; margin-bottom: 0.8rem;
+    }
+    .btn-google { background: #fff; color: #222; }
+    .btn-google img { width: 22px; height: 22px; }
+    .btn-phone { background: #00d4ff; color: #000; }
+    .divider { color: #444; font-size: 0.85rem; margin: 1rem 0; }
+    .error {
+      background: #2a1010; color: #ff6b6b; padding: 0.8rem;
+      border-radius: 10px; margin-bottom: 1.2rem; font-size: 0.9rem; display: none;
+    }
+    .phone-box {
+      display: none; text-align: left; margin-bottom: 1rem;
+      background: #111; border: 1px solid #222; border-radius: 14px; padding: 1rem;
+    }
+    .phone-box.show { display: block; }
+    .phone-box input {
+      width: 100%; padding: 0.75rem 1rem; background: #0a0a0a;
+      border: 1px solid #2a2a2a; border-radius: 10px; color: #fff;
+      outline: none; font-size: 1rem; margin-bottom: 0.7rem;
+    }
+    .phone-box button {
+      width: 100%; padding: 0.75rem; background: #00d4ff; color: #000;
+      border: none; border-radius: 50px; font-weight: 600; cursor: pointer;
+    }
+    .terms { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">Core<span>Talk</span></div>
+    <p class="tag">Chat + Live Status</p>
+
+    <div class="error" id="errorBox"></div>
+
+    <button class="btn btn-google" onclick="signInGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" />
+      Continue with Google
+    </button>
+
+    <div class="divider">or</div>
+
+    <button class="btn btn-phone" onclick="showPhone()">
+      📱 Continue with Phone
+    </button>
+
+    <div class="phone-box" id="phoneBox">
+      <input type="tel" id="phoneInput" placeholder="+1 234 567 8900 (any country)" />
+      <input type="text" id="otpInput" placeholder="Enter OTP code" style="display:none;" />
+      <button id="phoneBtn" onclick="signInPhone()">Send Code</button>
+      <div id="recaptcha" style="margin-top:0.8rem;"></div>
+    </div>
+
+    <p class="terms">Simple • Fast • Low data</p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    auth.onAuthStateChanged(u => { if (u) location.href = "chats.html"; });
+
+    let confirmationResult = null;
+
+    function showError(msg) {
+      const el = document.getElementById("errorBox");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+
+    function signInGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => showError(err.message));
+    }
+
+    function showPhone() {
+      document.getElementById("phoneBox").classList.add("show");
+      // Setup invisible reCAPTCHA
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha", {
+        size: "invisible"
+      });
+    }
+
+    function signInPhone() {
+      const phone = document.getElementById("phoneInput").value.trim();
+      const otpBox = document.getElementById("otpInput");
+      const btn = document.getElementById("phoneBtn");
+
+      if (!confirmationResult) {
+        // Send OTP
+        if (!phone.startsWith("+")) {
+          return showError("Include country code, e.g. +233...");
+        }
+        auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+          .then(result => {
+            confirmationResult = result;
+            otpBox.style.display = "block";
+            btn.textContent = "Verify Code";
+            showError(""); // clear
+            document.getElementById("errorBox").style.display = "none";
+          })
+          .catch(err => showError(err.message));
+      } else {
+        // Verify OTP
+        const code = otpBox.value.trim();
+        if (!code) return showError("Enter the code you received");
+        confirmationResult.confirm(code)
+          .then(() => location.href = "chats.html")
+          .catch(err => showError(err.message));
+      }
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>
